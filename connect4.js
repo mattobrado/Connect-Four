@@ -31,8 +31,7 @@ function makeBoard() {
 function makeHtmlBoard() {
   const htmlBoard = document.querySelector("#board"); // get HTML item w/ID "board"
 
-  // create table row element where players will click
-  const clickableRow = document.createElement("tr"); 
+  const clickableRow = document.createElement("tr"); // create table row element where players will click
   clickableRow.setAttribute("id", "clickable-row"); // set id to "clickable-row"
   clickableRow.addEventListener("click", handleClick); // event listener for player's clicks
 
@@ -46,7 +45,6 @@ function makeHtmlBoard() {
   htmlBoard.append(clickableRow); // append clickable row to htmlBoard
 
   // create html board
-
   // iterate through rows
   for (let rowIndex = 0; rowIndex < HEIGHT; rowIndex++) {
     const row = document.createElement("tr");// create tablerow element 
@@ -65,32 +63,26 @@ function makeHtmlBoard() {
 /** findSpotForCol: given column x, return top empty y (null if filled) */
 
 function findSpotForCol(x) {
-  // TODO: write the real version of this, rather than always returning 0
-  // extract column
+  // extract the column from board using map
   const column = board.map((value) => value[x])
-  console.dir(column);
-  
-  const result =column.reduce((acumulator, currVal, currIndex) =>{
-    console.log(`acumulator ${acumulator}`);
-    console.log(currVal);
-    console.log(!currVal);
-    console.log(`currIndex: ${currIndex}`);
-    if (!currVal){
-      return currIndex;
+
+  //iterate backwards through array to find "lowest" empty space
+  for (let i = column.length - 1; i >= 0; i--){
+    // empty spaces are spaces such that board[x][y] === null
+    if (column[i] === null){ 
+      return i; // return index of empty space
     }
-    return  acumulator;
-  }, 0);
-  console.log(`result: ${result}`);
-  return result;
+  }
+  return null; // no space was empty so return null;
 }
 
 /** placeInTable: update DOM to place piece into HTML table of board */
 
 function placeInTable(rowIndex, columnIndex) {
-  const cell = document.getElementById(`${rowIndex}-${columnIndex}`)// get correct cell
+  // get correct cell
+  const cell = document.getElementById(`${rowIndex}-${columnIndex}`)
 
-  // create piece
-  const piece = document.createElement("div"); 
+  const piece = document.createElement("div"); // create piece
   piece.classList.add("piece"); // add piece class
   piece.classList.add(`p${currPlayer}`); // add class for current player
 
@@ -100,45 +92,39 @@ function placeInTable(rowIndex, columnIndex) {
 /** endGame: announce game end */
 
 function endGame(msg) {
-  // TODO: pop up alert message
-  alert(`Player ${currPlayer} Wins!`);
+  alert(msg); // make an alert with msg text
 }
 
 /** handleClick: handle click of column top to play piece */
 
 function handleClick(evt) {
-  const columnIndex = +evt.target.id; // get x from ID of clicked cell
+  // get x from ID of clicked cell
+  const columnIndex = +evt.target.id; 
 
   // get next spot in column (if none, ignore click)
   const rowIndex = findSpotForCol(columnIndex);
+  // findSpotForCol() returns null if there is no avaiable space
   if (rowIndex === null) {
-    return;
+    return; // return now so we don't change turns
   }
 
   // place piece in board and add to HTML table
-  board[rowIndex][columnIndex] = currPlayer; // update in-memory board
-  console.log(`board[${rowIndex}][${columnIndex}]: ${board[rowIndex][columnIndex]}`)
   placeInTable(rowIndex, columnIndex);
+
+  // update in-memory board
+  board[rowIndex][columnIndex] = currPlayer; 
 
   // check for win
   if (checkForWin()) {
-    return endGame(`Player ${currPlayer} won!`);
+    return endGame(`Player ${currPlayer} won!`); // call endgame() to alert() players
   }
 
   // check for tie
-  // TODO: check if all cells in board are filled; if so call, call endGame
-if(
-  board.every(row => {
-    // console.dir(row);
-    return row.every(cell => {
-      // console.log(cell);
-      // console.log(!!cell);
-      return cell;
-    })
-  })
-){
-  alert(`Player ${currPlayer} Tie!!`);
-}
+
+  if( board.every(row => row.every(cell => cell)) ){ // check every cell is not null
+                                                     // (cell returns false if null)
+    endGame(`Tie!`);
+  }
 
   // switch players
   if(currPlayer === 1){
@@ -158,6 +144,7 @@ function checkForWin() {
     //  - cells: list of four (y, x) cells
     //  - returns true if all are legal coordinates & all match currPlayer
 
+    // this checks that all spaces in the potential match are in-bounds and the same player's
     return cells.every(
       ([y, x]) =>
         y >= 0 &&
@@ -168,8 +155,7 @@ function checkForWin() {
     );
   }
 
-  // TODO: read and understand this code. Add comments to help you.
-
+  // this loop checks every possible match for every space
   for (let y = 0; y < HEIGHT; y++) {
     for (let x = 0; x < WIDTH; x++) {
       const horiz = [[y, x], [y, x + 1], [y, x + 2], [y, x + 3]];
